@@ -11,4 +11,4 @@ After installing NodeJS and Mongodb, execute below commands to run the program
 npm run dev 
 ```
 
-### To confugure your database go to app.js file and change you mongodburi to mongodb://localhost:27017/<your_db_name>
+### To configure your database go to app.js file and change you mongodburi to mongodb://localhost:27017/<your_db_name>
