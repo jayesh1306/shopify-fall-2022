@@ -1,65 +1,83 @@
 var express = require('express');
 var router = express.Router();
 
-// Database Schema for Product 
-const Product = require('../models/Product');
+// Models
+var Products = require('../models/Product');
 
-//Main routes
-router.post('/addProduct', (req, res, next) => {
+// Get all Inventory Products
+router.get('/getAllProducts', (req, res, next) => {
+  console.log("Products");
 
-  var { title, price, category, stock } = req.body;
-
-  if (!title && !price && !category && !stock) {
-    return res.json({ message: "All fields are required" });
-  }
-
-  var newProduct = new Product({
-    title,
-    price,
-    category,
-    stock
-  });
-
-  // Storing product in database
-  newProduct.save()
-    .then(result => {
-      console.log(result);
-      res.json({ message: "Successfully Added Product", result });
-
-    })
-    .catch(err => {
-      console.log(err.data);
-      res.json(err);
-    });
-})
-
-// Edit Inventory Product
-router.put('/edit/:productId', (req, res, next) => {
-  Product.updateOne({ _id: req.params.productId }, req.body, { new: true })
-    .then(result => {
-      if (result.acknowledged) { //  1 == Edited, 0 == Not Edited
-        res.json({ message: "Updated Successfully" });
+  Products.find()
+    .then(products => {
+      if (products.length == 0) {
+        res.json({ message: "No Products found in Inventory" });
+      } else {
+        console.log(products);
+        res.json(products);
       }
     })
     .catch(err => {
-      console.log("Cannot updated Product : Something went wrong");
-      res.json(err.data)
+      console.log("Error : ", err);
+      res.json(err);
     });
 
-  res.json({ message: "Edited", id: req.params.productId });
-});
+})
 
-// Test api to get all products
-router.get('/all', (req, res, next) => {
-  Product.find()
+// Add Product in Inventory
+router.post('/addProduct', (req, res, next) => {
+  console.log("Add Product");
+
+  var { title, price, category, stock } = req.body;
+
+  var product = new Products({ title, price, category, stock });
+
+  // Conditions for Empty Values
+  if (title && price && category && stock) {
+    return res.json({ message: "All values are required" });
+  }
+
+  product
+    .save()
     .then(result => {
-      console.log(result)
-      res.json(result)
+      if (result) {
+        console.log(result);
+        return res.json(result)
+      } else {
+        return res.json({ message: "Cannot save Product. Something went Wrong" });
+      }
     })
     .catch(err => {
       console.log(err);
-      res.json(err);
+      return res.json(err)
     });
+
+
+
+  console.log(title, price, category, stock);
 });
+
+
+router.delete('/delete/:productId', (req, res, next) => {
+  console.log(req.params.productId);
+
+  if (req.params.productId) {
+    // Delete Product
+    Products.findOneAndDelete({ _id: req.params.productId })
+      .then(result => {
+        console.log(result, "NULL")
+
+        if (result == null) {
+          return res.json({ message: "No Product to delete" });
+        }
+        return res.json({ message: "Deleted Product", result });
+      })
+      .catch(err => {
+        console.log(err);
+        return res.json(err);
+      });
+  }
+});
+
 
 module.exports = router;

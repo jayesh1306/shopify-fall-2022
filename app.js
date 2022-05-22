@@ -2,14 +2,19 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var dotenv = require('dotenv');
+
 const mongoose = require('mongoose');
 
+// Environmental Configuration
+require('dotenv').config();
 
 // Connection with DB
-mongoose.connect("mongodb://localhost:27017/shopify-task", (err, result) => {
+mongoose.connect(process.env.MONGODB_URI, (err, result) => {
   if (err) { console.log(err) }
   else console.log("Connected DB");
 })
+
 
 var indexRouter = require('./routes/index');
 
